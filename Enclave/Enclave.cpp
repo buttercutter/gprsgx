@@ -66,14 +66,14 @@ void printf_helloworld(int flag)
 	// Layout of GPRSGX Portion of the State Save Area :
 	// https://www.intel.com/content/dam/www/public/emea/xe/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3d-part-4-manual.pdf#page=15
 
-    uintptr_t offset = 176; // 32 bytes + 144 bytes = 0x20 + 0x90 = 0xB0
+    uintptr_t offset = 144; // 32 bytes + 144 bytes = 0x20 + 0x90 = 0xB0
     long long ursp;
 
 	//asm ("mov %%gs:%1, %0" : "=r"(ursp) : "m"(*(char *)offset)); // 2338810765860929536
     //asm ("mov %%gs:(%1), %0" : "=r"(ursp) : "r"(offset)); // -4290487885628440576
 	//asm ("mov %%gs:0xB0, %0" : "=r"(ursp)); // 0
-	asm ("mov %%gs:0x20 , %0" : "=r"(ursp)); // 140306321915720
-
+	asm ("mov %%gs:0x28 , %0" : "=r"(ursp)); // 140306321915720
+/*
 	printf("divisor = %d\n", divisor);
 
 	if(flag == 0) divisor = 0;
@@ -94,7 +94,7 @@ void printf_helloworld(int flag)
 		{
 			quotient = dividend / divisor;
 			printf("inside the else\n");
-			printf("ursp = %lld\n", ursp);
+			printf("ursp = %p\n", ursp);
 			printf("quotient = %d\n", quotient);
 		}
 	} 
@@ -102,7 +102,7 @@ void printf_helloworld(int flag)
 
 		printf("Inside catch()\n");			
 
-		printf("ursp = %lld\n", ursp);
+		printf("ursp = %p\n", ursp);
 
 		printf("divisor = %d\n", divisor);
 
@@ -115,25 +115,29 @@ void printf_helloworld(int flag)
 	}
 
 	printf("Outside of throw-catch exception block\n");
-
-	printf("ursp = %lld\n", ursp);
-
 	printf("divisor = %d\n", divisor);
-
+*/
+	printf("ursp = %p\n", ursp);
 
     // read the outside stack address from current SSA
     thread_data_t *thread_data = get_thread_data();
+
+	printf("thread_data = %p\n", thread_data);
+
+	long long stack_guard;
+	printf("stack_guard = %p\n", thread_data->stack_guard);
+
     ssa_gpr_t *ssa_gpr = reinterpret_cast<ssa_gpr_t *>(thread_data->first_ssa_gpr);
 
 	// https://github.com/intel/linux-sgx/blob/master/common/inc/internal/arch.h#L129-L155
     size_t rax_addr = ssa_gpr->REG(ax); // RAX
 	size_t ursp_addr = ssa_gpr->REG(sp_u); // URSP
+	size_t urbp_addr = ssa_gpr->REG(bp_u); // URBP
 
 	// rax_addr and ursp_addr do not match the value of %%gs:0x20 and host's ESP respectively
-	printf("using API call, start of GPRSGX region = %lld\n", rax_addr); 
-	printf("using API call, URSP of GPRSGX region = %lld\n", ursp_addr);
-
+	printf("using API call, start of GPRSGX region = %p\n", rax_addr); 
+	printf("using API call, URSP of GPRSGX region = %p\n", ursp_addr);
+	printf("using API call, URBP of GPRSGX region = %p\n", urbp_addr);
 
 	//printf("using API call, start of GPRSGX region = %lld\n", *(long long*) (p+0x20));
 }
-
