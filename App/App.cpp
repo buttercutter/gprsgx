@@ -233,31 +233,28 @@ int SGX_CDECL main(int argc, char *argv[])
 {
     (void)(argc);
     (void)(argv);
+/*
+	register long long rbp asm("rbp");
+	printf("rbp = %p\n" , rbp);
 
-	register long long esp asm("esp");
-	printf("esp = %lld\n" , esp);
-
+	register long long rsp asm("rsp");
+	printf("rsp = %p\n" , rsp);
+*/
     /* Initialize the enclave */
     if(initialize_enclave() < 0){
         printf("Enter a character before exit ...\n");
         getchar();
         return -1; 
     }
+
+	register long long* rbp asm("rbp");
+	printf("rbp = %p\n" , rbp);
+
+	register long long* rsp asm("rsp");
+	printf("rsp = %p\n" , rsp);
  
     printf_helloworld(global_eid, 0);
-	
-	printf("hello2222\n");
 
-	printf_helloworld(global_eid, 1);
-
-	//__asm( "mov register_URSP, %(gs)+0x20+0x90;" );
-
-/*	int offset = 36;
-	int gs;
-	asm ("mov %%gs:(%1), %0" : "=r"(gs) : "r"(offset));
-
-	printf("gs = %d\n", gs);
-*/
     /* Destroy the enclave */
     sgx_destroy_enclave(global_eid);
     
@@ -265,4 +262,3 @@ int SGX_CDECL main(int argc, char *argv[])
 
     return 0;
 }
-
