@@ -140,4 +140,10 @@ void printf_helloworld(int flag)
 	printf("using API call, URBP of GPRSGX region = %p\n", urbp_addr);
 
 	//printf("using API call, start of GPRSGX region = %lld\n", *(long long*) (p+0x20));
+
+	while(urbp_addr != 0)
+	{
+		urbp_addr = *(reinterpret_cast<size_t *>(urbp_addr));
+		printf("dereferencing RBP chain : %p\n", urbp_addr);
+	}
 }
